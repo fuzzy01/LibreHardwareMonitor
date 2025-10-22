@@ -4285,7 +4285,7 @@ internal sealed class SuperIOHardware : Hardware
 
                     case Model.ROG_STRIX_B760_I_GAMING_WIFI: //NCT6798D
                      
-                        v.Add(new Voltage("Vcore", 0));
+                        v.Add(new Voltage("Vcore", 0, 1, 10));
                         v.Add(new Voltage("+5V", 1, 4, 1));
                         v.Add(new Voltage("AVSB", 2, 34, 34));
                         v.Add(new Voltage("3VCC", 3, 34, 34));
@@ -4296,7 +4296,7 @@ internal sealed class SuperIOHardware : Hardware
                         v.Add(new Voltage("CMOS Battery", 8, 34, 34));
                         v.Add(new Voltage("CPU Termination", 9, 1, 1));
                         v.Add(new Voltage("IMC VDD", 10, 1, 1));
-                        v.Add(new Voltage("Voltage #12", 11, true));
+                        v.Add(new Voltage("CPU L2", 11, true));
                         v.Add(new Voltage("Voltage #13", 12, true));
                         v.Add(new Voltage("Voltage #14", 13, true));
                         v.Add(new Voltage("Voltage #15", 14, true));
@@ -4822,34 +4822,92 @@ internal sealed class SuperIOHardware : Hardware
                         break;
 
                     default:
-                        v.Add(new Voltage("Vcore", 0));
-                        v.Add(new Voltage("Voltage #2", 1, true));
+                    
+                        v.Add(new Voltage("Vcore", 0, 1, 10));
+                        v.Add(new Voltage("+5V", 1, 4, 1));
                         v.Add(new Voltage("AVCC", 2, 34, 34));
                         v.Add(new Voltage("+3.3V", 3, 34, 34));
-                        v.Add(new Voltage("Voltage #5", 4, true));
+                        v.Add(new Voltage("+12V", 4, 11, 1));
                         v.Add(new Voltage("Voltage #6", 5, true));
                         v.Add(new Voltage("Voltage #7", 6, true));
                         v.Add(new Voltage("+3V Standby", 7, 34, 34));
                         v.Add(new Voltage("CMOS Battery", 8, 34, 34));
-                        v.Add(new Voltage("CPU Termination", 9));
-                        v.Add(new Voltage("Voltage #11", 10, true));
+                        v.Add(new Voltage("CPU Termination", 9, 1, 1));
+                        v.Add(new Voltage("CPU L2", 10, true));
                         v.Add(new Voltage("Voltage #12", 11, true));
                         v.Add(new Voltage("Voltage #13", 12, true));
                         v.Add(new Voltage("Voltage #14", 13, true));
                         v.Add(new Voltage("Voltage #15", 14, true));
-                        t.Add(new Temperature("CPU Core", 0));
-                        t.Add(new Temperature("Temperature #1", 1));
-                        t.Add(new Temperature("Temperature #2", 2));
-                        t.Add(new Temperature("Temperature #3", 3));
-                        t.Add(new Temperature("Temperature #4", 4));
-                        t.Add(new Temperature("Temperature #5", 5));
-                        t.Add(new Temperature("Temperature #6", 6));
+
+                        switch (superIO.Chip)
+                        {
+                            case Chip.NCT6796D:
+                            case Chip.NCT6796DR:
+                            case Chip.NCT6797D:
+                            case Chip.NCT6798D:
+                            case Chip.NCT6799D:
+                            case Chip.NCT6701D:
+
+                                v.Add(new Voltage("Voltage #16", 15, true));
+
+                                t.Add(new Temperature("CPU Package", 0));
+                                t.Add(new Temperature("CPU", 1));
+                                t.Add(new Temperature("Motherboard", 2));
+                                t.Add(new Temperature("VRM Thermistor", 3));
+                                t.Add(new Temperature("Temperature #4", 4));
+                                t.Add(new Temperature("Temperature #5", 5));
+                                t.Add(new Temperature("Temperature #6", 6));
+                                t.Add(new Temperature("Temperature #7", 7));
+                                t.Add(new Temperature("T Sensor", 8));
+                                t.Add(new Temperature("PCH", 13));
+                                t.Add(new Temperature("CPU Calibrated", 22));
+
+                                break;
+
+                            default:
+
+                                t.Add(new Temperature("CPU Package", 0));
+                                t.Add(new Temperature("CPU", 1));
+                                t.Add(new Temperature("Motherboard", 2));
+                                t.Add(new Temperature("Temperature #3", 3));
+                                t.Add(new Temperature("Temperature #4", 4));
+                                t.Add(new Temperature("Temperature #5", 5));
+                                t.Add(new Temperature("Temperature #6", 6));
+
+                                break;
+                        }
 
                         for (int i = 0; i < superIO.Fans.Length; i++)
-                            f.Add(new Fan("Fan #" + (i + 1), i));
+                        {
+                            switch (i)
+                            {
+                                case 0:
+                                    f.Add(new Fan("Chassis Fan #1", 0));
+                                    break;
+                                case 1:
+                                    f.Add(new Fan("CPU Fan", 1));
+                                    break;      
+                                default:
+                                    f.Add(new Fan("Fan #" + (i + 1), i));
+                                    break;
+                            }
+                        }   
 
                         for (int i = 0; i < superIO.Controls.Length; i++)
-                            c.Add(new Control("Fan #" + (i + 1), i));
+                        {
+                            switch (i)
+                            {
+                                case 0:
+                                    c.Add(new Control("Chassis Fan #1", 0));
+                                    break;
+                                case 1:
+                                    c.Add(new Control("CPU Fan", 1));
+                                    break;
+                                default:
+                                    c.Add(new Control("Fan #" + (i + 1), i));
+                                    break;
+                            }
+                        }
 
                         break;
                 }
