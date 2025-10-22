@@ -318,10 +318,12 @@ internal sealed class NvidiaGpu : GenericGpu
             {
                 _powerUsage = new Sensor("GPU Package", 0, SensorType.Power, this, settings);
 
-                _pcieThroughputRx = new Sensor("GPU PCIe Rx", 0, SensorType.Throughput, this, settings);
-                _pcieThroughputTx = new Sensor("GPU PCIe Tx", 1, SensorType.Throughput, this, settings);
+                // Not needed for cooling control
+                // _pcieThroughputRx = new Sensor("GPU PCIe Rx", 0, SensorType.Throughput, this, settings);
+                // _pcieThroughputTx = new Sensor("GPU PCIe Tx", 1, SensorType.Throughput, this, settings);
 
-                if (!Software.OperatingSystem.IsUnix)
+                // Not needed for cooling control
+                if (false && !Software.OperatingSystem.IsUnix)
                 {
                     NvidiaML.NvmlPciInfo? pciInfo = NvidiaML.NvmlDeviceGetPciInfo(_nvmlDevice.Value);
 
@@ -419,10 +421,11 @@ internal sealed class NvidiaGpu : GenericGpu
             }
         }
 
-        _memoryFree = new Sensor("GPU Memory Free", 0, SensorType.SmallData, this, settings);
-        _memoryUsed = new Sensor("GPU Memory Used", 1, SensorType.SmallData, this, settings);
-        _memoryTotal = new Sensor("GPU Memory Total", 2, SensorType.SmallData, this, settings);
-        _memoryLoad = new Sensor("GPU Memory", 3, SensorType.Load, this, settings);
+        // Not needed for cooling control
+        // _memoryFree = new Sensor("GPU Memory Free", 0, SensorType.SmallData, this, settings);
+        // _memoryUsed = new Sensor("GPU Memory Used", 1, SensorType.SmallData, this, settings);
+        // _memoryTotal = new Sensor("GPU Memory Total", 2, SensorType.SmallData, this, settings);
+        // _memoryLoad = new Sensor("GPU Memory", 3, SensorType.Load, this, settings);
 
         Update();
     }
@@ -598,7 +601,8 @@ internal sealed class NvidiaGpu : GenericGpu
             }
         }
 
-        if (_displayHandle != null)
+        // Not needed for cooling control
+        if (false && _displayHandle != null)
         {
             NvApi.NvMemoryInfo memoryInfo = GetMemoryInfo(out status);
             if (status == NvApi.NvStatus.OK)
@@ -629,19 +633,23 @@ internal sealed class NvidiaGpu : GenericGpu
                 ActivateSensor(_powerUsage);
             }
 
-            // In MB/s, throughput sensors are passed as in KB/s.
-            uint? rx = NvidiaML.NvmlDeviceGetPcieThroughput(_nvmlDevice.Value, NvidiaML.NvmlPcieUtilCounter.RxBytes);
-            if (rx.HasValue)
+            // Not needed for cooling control
+            if (false && !Software.OperatingSystem.IsUnix)
             {
-                _pcieThroughputRx.Value = rx * 1024;
-                ActivateSensor(_pcieThroughputRx);
-            }
+                // In MB/s, throughput sensors are passed as in KB/s.
+                uint? rx = NvidiaML.NvmlDeviceGetPcieThroughput(_nvmlDevice.Value, NvidiaML.NvmlPcieUtilCounter.RxBytes);
+                if (rx.HasValue)
+                {
+                    _pcieThroughputRx.Value = rx * 1024;
+                    ActivateSensor(_pcieThroughputRx);
+                }
 
-            uint? tx = NvidiaML.NvmlDeviceGetPcieThroughput(_nvmlDevice.Value, NvidiaML.NvmlPcieUtilCounter.TxBytes);
-            if (tx.HasValue)
-            {
-                _pcieThroughputTx.Value = tx * 1024;
-                ActivateSensor(_pcieThroughputTx);
+                uint? tx = NvidiaML.NvmlDeviceGetPcieThroughput(_nvmlDevice.Value, NvidiaML.NvmlPcieUtilCounter.TxBytes);
+                if (tx.HasValue)
+                {
+                    _pcieThroughputTx.Value = tx * 1024;
+                    ActivateSensor(_pcieThroughputTx);
+                }
             }
         }
     }
